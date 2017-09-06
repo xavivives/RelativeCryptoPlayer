@@ -24,7 +24,9 @@ class App extends Component
             oneDay:86400
         }
 
-        this.state = {data:[]}
+        this.state = {
+            data:[],
+            currencies:[]}
         //let baseUrl= 'https://poloniex.com/public?command=returnChartData&currencyPair=BTC_XMR&end=9999999999&period=14400&start=1405699200'
         
 
@@ -120,7 +122,7 @@ class App extends Component
                 }
         })
         .then((result)=> {
-
+            console.log(result)
             let referenceValue = result.data[0].weightedAverage
 
             result.data.map(function(x, index)
@@ -165,7 +167,7 @@ class App extends Component
             }
 
             this.setState({currencies:currencies})
-        });
+        }).catch((error)=>{console.error(error)});
     }
 
 
@@ -173,9 +175,12 @@ class App extends Component
         return (
             <div className="App">
 
-                <CurrenciesList style={{display:"inline-block"}} data= {this.state.currencies}/>
+                <div style={{display:"inline-block", height:window.innerHigh}}>
+                    <CurrenciesList  data= {this.state.currencies}/>
+                </div>
+                
 
-                <LineChart style={{display:"inline-block"}} width={900} height={500} data={this.state.data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                <LineChart style={{display:"inline-block"}} width={500} height={500} data={this.state.data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                    
                     <Line type="monotone" dataKey="BTC_ETH" stroke="#88ffd8" dot = {false}/>
                     <Line type="monotone" dataKey="BTC_XMR" stroke="#ff84d8" dot = {false} />
@@ -187,9 +192,6 @@ class App extends Component
                     <YAxis />
                     <Tooltip />
                 </LineChart>
-
-
-
 
             </div>
         );
