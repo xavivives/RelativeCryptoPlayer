@@ -3,6 +3,7 @@ import unga from './unga.js';
 import './App.css';
 import { LineChart, Line ,CartesianGrid, XAxis, YAxis, Tooltip} from 'recharts';
 import Axios from 'axios'
+import CurrenciesList from './CurrenciesList.js'
 
 class App extends Component
 {
@@ -147,8 +148,6 @@ class App extends Component
         //"https://poloniex.com/public?command=returnCurrencies"
         Axios.get('https://poloniex.com/public',{params:{command: 'returnCurrencies'}})
         .then((result)=> {
-            console.log(result)
-
             let currencies = []
 
             for (var currency in result.data) {
@@ -156,42 +155,40 @@ class App extends Component
                     if(result.data[currency].disabled || result.data[currency].delisted)
                         continue;
 
-
                     let c = {
                         id:currency,
                         name:result.data[currency].name
                     }
 
-                    currencies.push(c)
-                  
+                    currencies.push(c)     
                 }
             }
 
-            console.log(currencies)
-            
+            this.setState({currencies:currencies})
         });
-
     }
 
 
     render() {
-
-
         return (
             <div className="App">
-                <unga/>
-                    <LineChart width={900} height={500} data={this.state.data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                       
-                        <Line type="monotone" dataKey="BTC_ETH" stroke="#88ffd8" dot = {false}/>
-                        <Line type="monotone" dataKey="BTC_XMR" stroke="#ff84d8" dot = {false} />
-                        <Line type="monotone" dataKey="BTC_USDT" stroke="#888488" dot = {false} />
-                        <Line type="monotone" dataKey="BTC_LTC" stroke="#833488" dot = {false} />
-                        
-                        
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                    </LineChart>
+
+                <CurrenciesList style={{display:"inline-block"}} data= {this.state.currencies}/>
+
+                <LineChart style={{display:"inline-block"}} width={900} height={500} data={this.state.data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                   
+                    <Line type="monotone" dataKey="BTC_ETH" stroke="#88ffd8" dot = {false}/>
+                    <Line type="monotone" dataKey="BTC_XMR" stroke="#ff84d8" dot = {false} />
+                    <Line type="monotone" dataKey="BTC_USDT" stroke="#888488" dot = {false} />
+                    <Line type="monotone" dataKey="BTC_LTC" stroke="#833488" dot = {false} />
+                    
+                    
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                </LineChart>
+
+
 
 
             </div>
