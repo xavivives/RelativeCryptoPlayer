@@ -5,117 +5,42 @@ import { LineChart, Line ,CartesianGrid, XAxis, YAxis, Tooltip} from 'recharts';
 import Axios from 'axios'
 import CurrenciesList from './CurrenciesList.js'
 
+const period = 
+{
+    fiveMinutes:300,
+    fifteenMinutes:900,
+    halfHour:1800,
+    twoHours:7200,
+    fourHours:14400,
+    oneDay:86400
+}
+
 class App extends Component
 {
     constructor (props)
     {
         super()
-        let days = 30
-        let delta = days*24*60*60
-        let startTimestamp = Date.now()/1000 - delta
-        let endTimestamp = Date.now()/1000
-        let period = 
-        {
-            fiveMinutes:300,
-            fifteenMinutes:900,
-            halfHour:1800,
-            twoHours:7200,
-            fourHours:14400,
-            oneDay:86400
-        }
 
         this.state = {
             data:[],
             currencies:[]}
         //let baseUrl= 'https://poloniex.com/public?command=returnChartData&currencyPair=BTC_XMR&end=9999999999&period=14400&start=1405699200'
-        
+    }
 
-        this.getCurrencyPairs();
-        let main = []
+
+
+    downloadCurrency=(id)=>
+    {
+        let days = 30
+        let delta = days*24*60*60
+        let startTimestamp = Date.now()/1000 - delta
+        let endTimestamp = Date.now()/1000
+
+        let currencyPair = 'BTC_'+id
         Axios.get('https://poloniex.com/public',{
                 params:{
                 command: 'returnChartData',
-                currencyPair: 'BTC_XMR',
-                period:period.oneDay,
-                end:endTimestamp,
-                start:startTimestamp
-                }
-            })
-        .then((result)=> {
-
-            let referenceValue = result.data[0].weightedAverage
-
-            result.data.map(function(x, index)
-            {
-                if(!main[index])
-                    main[index] = {}
-
-                main[index]['BTC_XMR'] = x.weightedAverage/referenceValue
-                
-            })
-
-            this.setState({data:main})
-            console.log(main)
-        });
-
-
-        Axios.get('https://poloniex.com/public',{
-                params:{
-                command: 'returnChartData',
-                currencyPair: 'BTC_ETH',
-                period:period.oneDay,
-                end:endTimestamp,
-                start:startTimestamp
-            }
-        })
-        .then((result)=> {
-
-            let referenceValue = result.data[0].weightedAverage
-
-            result.data.map(function(x, index)
-            {
-                if(!main[index])
-                    main[index] = {}
-
-                main[index]['BTC_ETH'] = x.weightedAverage/referenceValue
-                
-            })
-
-            this.setState({Data:main})
-
-        });
-
-
-        Axios.get('https://poloniex.com/public',{
-                params:{
-                command: 'returnChartData',
-                currencyPair: 'USDT_BTC',
-                period:period.oneDay,
-                end:endTimestamp,
-                start:startTimestamp
-                }
-        })
-        .then((result)=> {
-
-            let referenceValue = result.data[0].weightedAverage
-
-            result.data.map(function(x, index)
-            {
-                if(!main[index])
-                    main[index] = {}
-
-                main[index]['BTC_USDT'] = 1/(x.weightedAverage/referenceValue)
-                
-            })
-
-            this.setState({Data:main})
-
-        });
-
-        Axios.get('https://poloniex.com/public',{
-                params:{
-                command: 'returnChartData',
-                currencyPair: 'BTC_LTC',
+                currencyPair: currencyPair,
                 period:period.oneDay,
                 end:endTimestamp,
                 start:startTimestamp
@@ -123,33 +48,35 @@ class App extends Component
         })
         .then((result)=> {
             console.log(result)
-            let referenceValue = result.data[0].weightedAverage
-
-            result.data.map(function(x, index)
+            
+            let history = result.data.map(function(x, index)
             {
-                if(!main[index])
-                    main[index] = {}
-
-                main[index]['BTC_LTC'] = 1/(x.weightedAverage/referenceValue)
-                
+                let data = {}
+                data.weightedAverage = x.weightedAverage
+                return data
             })
 
-            this.setState({Data:main})
-
+            let currencies = this.state.currencies
+            currencies[id].history = history
+            this.setState({currencies:currencies})
+            console.log(currencies)
         });
-
-    
-
-
-        
     }
 
-    onCurrencyToggle=(data,value)=>
+    enableCurrency=(id)=>
+    {
+        if(!this.state.currencies[id].data)
+            this.downloadCurrency(id)
+    }
+
+    onCurrencyToggle=(data, isOn)=>
     {
         let currencies = this.state.currencies
-        currencies[data.id].isActive = value
-        console.log(currencies[data.id])
+        currencies[data.id].isActive = isOn
         this.setState({currencies:currencies})
+
+        if(isOn)
+            this.enableCurrency(data.id)
     }
 
 
@@ -168,7 +95,7 @@ class App extends Component
                     let c = {
                         id:currency,
                         name:result.data[currency].name,
-                        isActive:true
+                        isActive:false
                     }
 
                     currencies[currency]=c    
