@@ -6,16 +6,10 @@ import { withStyles } from 'material-ui/styles'
 import List, { ListItem, ListItemSecondaryAction, ListItemText } from 'material-ui/List'
 import Checkbox from 'material-ui/Checkbox'
 import Input from 'material-ui/Input/Input'
+import CurrencyListItem from './CurrencyListItem.js'
 
-const styles = theme => ({
-  root: {
-    width: '100%',
-    maxWidth: 360,
-    background: theme.palette.background.paper,
-  },
-})
-
-class CheckboxListSecondary extends React.Component {
+class CurrenciesList extends React.Component
+{
 
 
     constructor(props)
@@ -27,49 +21,20 @@ class CheckboxListSecondary extends React.Component {
         }
     }
 
-    handleToggle = (event, value) => {
-        const { checked } = this.state
-        const currentIndex = checked.indexOf(value)
-        const newChecked = [...checked]
-
-        if (currentIndex === -1) {
-          newChecked.push(value)
-        } else {
-          newChecked.splice(currentIndex, 1)
-        }
-
-        this.setState({
-          checked: newChecked,
-        })
+    onToggle = (data, value) =>
+    {
+        this.props.onToggle(data,value)
     }
 
     getList=()=>
     {
-        let list = this.state.filteredList.map((x,index)=> (
-
-            <ListItem dense button key={x.id}>
-                <ListItemText secondary={x.id} />
-                <ListItemText primary={x.name} />
-                <ListItemSecondaryAction>
-                  <Checkbox
-                    onClick={this.handleToggle}
-                    checked={0}
-                  />
-                </ListItemSecondaryAction>
-            </ListItem>
-        ))
+        let list = this.state.filteredList.map((x,index)=>(<CurrencyListItem onToggle = {this.onToggle} data={x}/>))
 
         return list
     }
 
     onSearchChange=(e)=>
     {
-        if(e.target.value=="")
-        {
-            this.setState({filteredList:this.props.data})
-            return
-        }
-
         let filteredList = this.getSearch(e.target.value)
 
         this.setState({filteredList:filteredList})
@@ -79,11 +44,13 @@ class CheckboxListSecondary extends React.Component {
     {
         var searchResults = []
         
-        for (var i=0; i < this.props.data.length; i++)
-        {
-            if ((this.props.data[i].name.indexOf(str)!==-1) || (this.props.data[i].id.indexOf(str)!==-1))
-            {
-                searchResults.push(this.props.data[i])
+        for (var currency in this.props.data) {
+            if ( this.props.data.hasOwnProperty(currency)) {
+
+                if ((this.props.data[currency].name.toLowerCase().indexOf(str.toLowerCase())!==-1) || (this.props.data[currency].id.toLowerCase().indexOf(str.toLowerCase())!==-1))
+                {
+                    searchResults.push(this.props.data[currency])
+                }
             }
         }
         
@@ -98,10 +65,9 @@ class CheckboxListSecondary extends React.Component {
         list = this.getList()
 
     return (
-      <div className={classes.root}>
+      <div >
         <Input
             placeholder="Search"
-            className={classes.input}
             inputProps={{'aria-label': 'Description',}}
             onChange={this.onSearchChange}/>
         <List>
@@ -112,8 +78,4 @@ class CheckboxListSecondary extends React.Component {
   }
 }
 
-CheckboxListSecondary.propTypes = {
-  classes: PropTypes.object.isRequired,
-}
-
-export default withStyles(styles)(CheckboxListSecondary)
+export default CurrenciesList

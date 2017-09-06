@@ -144,6 +144,14 @@ class App extends Component
         
     }
 
+    onCurrencyToggle=(data,value)=>
+    {
+        let currencies = this.state.currencies
+        currencies[data.id].isActive = value
+        console.log(currencies[data.id])
+        this.setState({currencies:currencies})
+    }
+
 
     getCurrencyPairs=()=>
     {
@@ -159,10 +167,11 @@ class App extends Component
 
                     let c = {
                         id:currency,
-                        name:result.data[currency].name
+                        name:result.data[currency].name,
+                        isActive:true
                     }
 
-                    currencies.push(c)     
+                    currencies[currency]=c    
                 }
             }
 
@@ -174,13 +183,9 @@ class App extends Component
     render() {
         return (
             <div className="App">
-
-                <div style={{display:"inline-block", height:window.innerHigh}}>
-                    <CurrenciesList  data= {this.state.currencies}/>
-                </div>
                 
 
-                <LineChart style={{display:"inline-block"}} width={500} height={500} data={this.state.data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                <LineChart  width={500} height={500} data={this.state.data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                    
                     <Line type="monotone" dataKey="BTC_ETH" stroke="#88ffd8" dot = {false}/>
                     <Line type="monotone" dataKey="BTC_XMR" stroke="#ff84d8" dot = {false} />
@@ -192,6 +197,8 @@ class App extends Component
                     <YAxis />
                     <Tooltip />
                 </LineChart>
+
+                <CurrenciesList  style={{width:200}} data= {this.state.currencies} onToggle={this.onCurrencyToggle}/>
 
             </div>
         );
