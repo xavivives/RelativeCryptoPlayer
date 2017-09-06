@@ -9,23 +9,25 @@ class App extends Component
     constructor (props)
     {
         super()
-        let days = 360
+        let days = 30
         let delta = days*24*60*60
         let startTimestamp = Date.now()/1000 - delta
         let endTimestamp = Date.now()/1000
         let period = 
-            {
-                fiveMinutes:300,
-                fifteenMinutes:900,
-                halfHour:1800,
-                twoHours:7200,
-                fourHours:14400,
-                oneDay:86400
-            }
+        {
+            fiveMinutes:300,
+            fifteenMinutes:900,
+            halfHour:1800,
+            twoHours:7200,
+            fourHours:14400,
+            oneDay:86400
+        }
 
         this.state = {data:[]}
         //let baseUrl= 'https://poloniex.com/public?command=returnChartData&currencyPair=BTC_XMR&end=9999999999&period=14400&start=1405699200'
+        
 
+        this.getCurrencyPairs();
         let main = []
         Axios.get('https://poloniex.com/public',{
                 params:{
@@ -77,7 +79,7 @@ class App extends Component
             })
 
             this.setState({Data:main})
-            console.log(main)
+
         });
 
 
@@ -91,7 +93,7 @@ class App extends Component
                 }
         })
         .then((result)=> {
-            console.log(result)
+
             let referenceValue = result.data[0].weightedAverage
 
             result.data.map(function(x, index)
@@ -104,7 +106,7 @@ class App extends Component
             })
 
             this.setState({Data:main})
-            console.log(main)
+
         });
 
         Axios.get('https://poloniex.com/public',{
@@ -117,7 +119,7 @@ class App extends Component
                 }
         })
         .then((result)=> {
-            console.log(result)
+
             let referenceValue = result.data[0].weightedAverage
 
             result.data.map(function(x, index)
@@ -130,7 +132,7 @@ class App extends Component
             })
 
             this.setState({Data:main})
-            console.log(main)
+
         });
 
     
@@ -139,6 +141,37 @@ class App extends Component
         
     }
 
+
+    getCurrencyPairs=()=>
+    {
+        //"https://poloniex.com/public?command=returnCurrencies"
+        Axios.get('https://poloniex.com/public',{params:{command: 'returnCurrencies'}})
+        .then((result)=> {
+            console.log(result)
+
+            let currencies = []
+
+            for (var currency in result.data) {
+                if (result.data.hasOwnProperty(currency)) {
+                    if(result.data[currency].disabled || result.data[currency].delisted)
+                        continue;
+
+
+                    let c = {
+                        id:currency,
+                        name:result.data[currency].name
+                    }
+
+                    currencies.push(c)
+                  
+                }
+            }
+
+            console.log(currencies)
+            
+        });
+
+    }
 
 
     render() {
