@@ -24,10 +24,10 @@ class App extends Component
         this.state = {
             data:[],
             currencies:[]}
+
+        this.getCurrencyPairs()
         //let baseUrl= 'https://poloniex.com/public?command=returnChartData&currencyPair=BTC_XMR&end=9999999999&period=14400&start=1405699200'
     }
-
-
 
     downloadCurrency=(id)=>
     {
@@ -36,11 +36,10 @@ class App extends Component
         let startTimestamp = Date.now()/1000 - delta
         let endTimestamp = Date.now()/1000
 
-        let currencyPair = 'BTC_'+id
         Axios.get('https://poloniex.com/public',{
                 params:{
                 command: 'returnChartData',
-                currencyPair: currencyPair,
+                currencyPair: this.getCurrencyPair(id),
                 period:period.oneDay,
                 end:endTimestamp,
                 start:startTimestamp
@@ -79,6 +78,11 @@ class App extends Component
             this.enableCurrency(data.id)
     }
 
+    getCurrencyPair=(id)=>
+    {
+        return 'BTC_'+id
+    }
+
 
     getCurrencyPairs=()=>
     {
@@ -106,19 +110,54 @@ class App extends Component
         }).catch((error)=>{console.error(error)});
     }
 
+    getData=()=>
+    {
+        let data = []
+        for (var currency in this.state.currencies) {
+            if (this.state.currencies.hasOwnProperty(currency)) {
+                if(this.state.currencies[currency].isActive) {
+                    if(this.state.currencies[currency].history) {
+                        for(let i = 0; i<this.state.currencies[currency].history.length; i++)
+                        {
+                            if(!data[i])
+                                data[i] = {}
+
+                            data[i][this.state.currencies[currency].id] = this.state.currencies[currency].history[i]
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    getCurrencyLines=()=>
+    {
+        let lines = []
+        for (var currency in this.state.currencies) {
+            if (this.state.currencies.hasOwnProperty(currency)) {
+                if(this.state.currencies[currency].isActive) {
+                    if(this.state.currencies[currency].history) {
+                        lines.push(<Line type="monotone" dataKey={this.state.currencies[currency].id} stroke="#88ffd8" dot = {false}/>)
+                    }
+                }      
+            }
+        }
+    }
+
 
     render() {
+
+        let data = this.getData()
+        let lines = this.getCurrencyLines()
+
+
         return (
             <div className="App">
                 
 
-                <LineChart  width={500} height={500} data={this.state.data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                   
-                    <Line type="monotone" dataKey="BTC_ETH" stroke="#88ffd8" dot = {false}/>
-                    <Line type="monotone" dataKey="BTC_XMR" stroke="#ff84d8" dot = {false} />
-                    <Line type="monotone" dataKey="BTC_USDT" stroke="#888488" dot = {false} />
-                    <Line type="monotone" dataKey="BTC_LTC" stroke="#833488" dot = {false} />
+                <LineChart  width={500} height={500} data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                     
+                    {lines}
                     
                     <XAxis dataKey="name" />
                     <YAxis />
