@@ -40,7 +40,7 @@ class App extends Component
         //let baseUrl= 'https://poloniex.com/public?command=returnChartData&currencyPair=BTC_XMR&end=9999999999&period=14400&start=1405699200'
     }
 
-    downloadCurrency=(id, revertedPair = false)=>
+    downloadCurrency=(id, isReverted = false)=>
     {
         let days = 30
         let delta = days*24*60*60
@@ -48,7 +48,7 @@ class App extends Component
         let endTimestamp = Date.now()/1000
 
         let currencyPair = this.getCurrencyPair(id)
-        if(revertedPair)
+        if(isReverted)
             currencyPair = this.getRevertedCurrencyPair(id)
 
 
@@ -65,7 +65,7 @@ class App extends Component
             console.log(result)
             if(result.data.error)
             {   
-                if (result.data.error === "Invalid currency pair." && revertedPair === false)
+                if (result.data.error === "Invalid currency pair." && isReverted === false)
                 {
                     console.warn('Trying reverted pair for '+ id)
                     this.downloadCurrency(id, true)
@@ -79,11 +79,11 @@ class App extends Component
             }
                 
             if(result.data)
-                this.absorbCurrency(this.state.activeData, result.data, id, ['weightedAverage'] )
+                this.absorbCurrency(this.state.activeData, result.data, id, ['weightedAverage'], isReverted )
         });
     }
 
-    absorbCurrency(baseData, currencyArray, id, properties)
+    absorbCurrency(baseData, currencyArray, id, properties, isReverted)
     {
        let activeData = JSON.parse(JSON.stringify(baseData));
 
@@ -102,6 +102,10 @@ class App extends Component
                     if(currencyRecord.date === propertiesArray[i].date )
                     {
                         propertiesArray[i][id] = currencyRecord[property]
+                        if(isReverted)
+                            if(this.canBeReverted(property))
+                                propertiesArray[i][id] = 1/propertiesArray[i][id]
+
                         found = true
                         break
                     }
@@ -112,14 +116,26 @@ class App extends Component
                     let newRecord = {}
                     newRecord.date = currencyRecord.date
                     newRecord[id] = currencyRecord[property]
+
+                    if(isReverted)
+                        if(this.canBeReverted(property))
+                            newRecord[id] = 1/newRecord[id]
+
                     propertiesArray.push(newRecord)
                 }
-
             })
         })
 
         this.setState({activeData:activeData})
         console.log("activeData uploaded", this.state.activeData)
+    }
+
+    canBeReverted(property)
+    {
+        if(property ==='weightedAverage')
+            return true
+        else
+            return false
     }
 
     enableCurrency=(id)=>
