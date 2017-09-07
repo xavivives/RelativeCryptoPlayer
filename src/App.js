@@ -40,39 +40,46 @@ class App extends Component
         //let baseUrl= 'https://poloniex.com/public?command=returnChartData&currencyPair=BTC_XMR&end=9999999999&period=14400&start=1405699200'
     }
 
-    downloadCurrency=(id)=>
+    downloadCurrency=(id, revertedPair = false)=>
     {
         let days = 30
         let delta = days*24*60*60
         let startTimestamp = Date.now()/1000 - delta
         let endTimestamp = Date.now()/1000
 
+        let currencyPair = this.getCurrencyPair(id)
+        if(revertedPair)
+            currencyPair = this.getRevertedCurrencyPair(id)
+
+
         Axios.get('https://poloniex.com/public',{
                 params:{
                 command: 'returnChartData',
-                currencyPair: this.getCurrencyPair(id),
+                currencyPair: currencyPair,
                 period:period.fourHours,
                 end:endTimestamp,
                 start:startTimestamp
                 }
         })
         .then((result)=> {
-            console.log(result.data)
+            console.log(result)
+            if(result.data.error)
+            {   
+                if (result.data.error === "Invalid currency pair." && revertedPair === false)
+                {
+                    console.warn('Trying reverted pair for '+ id)
+                    this.downloadCurrency(id, true)
+                    return
+                }
+                else
+                {
+                    console.error(result.data.error)
+                    return
+                }
+            }
+                
             if(result.data)
                 this.absorbCurrency(this.state.activeData, result.data, id, ['weightedAverage'] )
-            
-            /*let history = result.data.map(function(x, index)
-            {
-                let data = {}
-                data.weightedAverage = x.weightedAverage
-                return data
-            })
-
-            let currencies = this.state.currencies
-            currencies[id].history = history
-            this.setState({currencies:currencies})
-            console.log(currencies)
-            */
         });
     }
 
@@ -138,6 +145,11 @@ class App extends Component
         return 'BTC_'+id
     }
 
+    getRevertedCurrencyPair=(id)=>
+    {
+        return id+'_BTC'
+    }
+
 
     getCurrencyPairs=()=>
     {
@@ -193,7 +205,7 @@ class App extends Component
                 if(this.state.currencies[currencyId].isActive) {
                     //if(this.state.activeData['weightedAverage'][currencyId]) {
                         console.log(currencyId)
-                        lines.push(<Line type="monotone" key= {currencyId} dataKey={currencyId} stroke="#8833d8" dot = {false}/>)
+                        lines.push(<Line isAnimationActive ={false} type="monotone" key= {currencyId} dataKey={currencyId} stroke="#8833d8" dot = {false}/>)
                     //}
                 }      
             }
