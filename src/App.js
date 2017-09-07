@@ -22,8 +22,19 @@ class App extends Component
         super()
 
         this.state = {
-            data:[],
-            currencies:[]}
+            activeData:{},
+            currencies:[]
+        }
+
+        /*
+        //Format example:
+
+        activeData:{
+            'weightedAverage':[{'BTC_XMR':1,'BTC_ETH':2,'date':123}],
+            'volume':[{'BTC_XMR':1,'BTC_ETH':2,'date':123}],
+            'relativeAvarage':[{'BTC_XMR':1,'BTC_ETH':2,'date':123}],
+        }
+        */
 
         this.getCurrencyPairs()
         //let baseUrl= 'https://poloniex.com/public?command=returnChartData&currencyPair=BTC_XMR&end=9999999999&period=14400&start=1405699200'
@@ -40,15 +51,16 @@ class App extends Component
                 params:{
                 command: 'returnChartData',
                 currencyPair: this.getCurrencyPair(id),
-                period:period.oneDay,
+                period:period.fourHours,
                 end:endTimestamp,
                 start:startTimestamp
                 }
         })
         .then((result)=> {
-            console.log(result)
+
+            this.absorbCurrency(this.state.activeData, result.data, id, ['weightedAverage'] )
             
-            let history = result.data.map(function(x, index)
+            /*let history = result.data.map(function(x, index)
             {
                 let data = {}
                 data.weightedAverage = x.weightedAverage
@@ -59,7 +71,45 @@ class App extends Component
             currencies[id].history = history
             this.setState({currencies:currencies})
             console.log(currencies)
+            */
         });
+    }
+
+    absorbCurrency(activeData, currencyArray, id, properties)
+    {
+        properties.map((property, propertyIndex)=>
+        {
+            if(!activeData[property])
+                activeData[property] = []
+
+            let propertiesArray = activeData[property]
+
+            currencyArray.map((currencyRecord, currencyRecordIndex)=>
+            {
+                let found = false
+                for(let i= 0; i< propertiesArray.length; i++)
+                {
+                    if(currencyRecord.date === propertiesArray[i].date )
+                    {
+                        propertiesArray[i][id] = currencyRecord[property]
+                        found = true
+                        break
+                    }
+                }
+            
+                if(!found)
+                {
+                    let newRecord = {}
+                    newRecord.date = currencyRecord.date
+                    newRecord[id] = currencyRecord[property]
+                    propertiesArray.push(newRecord)
+                }
+
+            })
+        })
+
+        this.setState({activeData:activeData})
+        console.log("activeData uploaded", this.state.activeData)
     }
 
     enableCurrency=(id)=>
@@ -73,6 +123,8 @@ class App extends Component
         let currencies = this.state.currencies
         currencies[data.id].isActive = isOn
         this.setState({currencies:currencies})
+
+        console.log("currency  toggled")
 
         if(isOn)
             this.enableCurrency(data.id)
@@ -133,29 +185,31 @@ class App extends Component
     getCurrencyLines=()=>
     {
         let lines = []
-        for (var currency in this.state.currencies) {
-            if (this.state.currencies.hasOwnProperty(currency)) {
-                if(this.state.currencies[currency].isActive) {
-                    if(this.state.currencies[currency].history) {
-                        lines.push(<Line type="monotone" dataKey={this.state.currencies[currency].id} stroke="#88ffd8" dot = {false}/>)
-                    }
+        for (var currencyId in this.state.currencies) {
+            if (this.state.currencies.hasOwnProperty(currencyId)) {
+                if(this.state.currencies[currencyId].isActive) {
+                    //if(this.state.activeData['weightedAverage'][currencyId]) {
+                        console.log(currencyId)
+                        lines.push(<Line type="monotone" key= {currencyId} dataKey={currencyId} stroke="#8833d8" dot = {false}/>)
+                    //}
                 }      
             }
         }
+        return lines
     }
 
 
     render() {
 
-        let data = this.getData()
+        
         let lines = this.getCurrencyLines()
-
+        console.log("draw")
 
         return (
             <div className="App">
                 
 
-                <LineChart  width={500} height={500} data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                <LineChart  width={800} height={400} data={this.state.activeData['weightedAverage']} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                     
                     {lines}
                     
