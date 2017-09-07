@@ -57,8 +57,9 @@ class App extends Component
                 }
         })
         .then((result)=> {
-
-            this.absorbCurrency(this.state.activeData, result.data, id, ['weightedAverage'] )
+            console.log(result.data)
+            if(result.data)
+                this.absorbCurrency(this.state.activeData, result.data, id, ['weightedAverage'] )
             
             /*let history = result.data.map(function(x, index)
             {
@@ -75,8 +76,10 @@ class App extends Component
         });
     }
 
-    absorbCurrency(activeData, currencyArray, id, properties)
+    absorbCurrency(baseData, currencyArray, id, properties)
     {
+       let activeData = JSON.parse(JSON.stringify(baseData));
+
         properties.map((property, propertyIndex)=>
         {
             if(!activeData[property])
@@ -203,7 +206,6 @@ class App extends Component
 
         
         let lines = this.getCurrencyLines()
-        console.log("draw")
 
         return (
             <div className="App">
