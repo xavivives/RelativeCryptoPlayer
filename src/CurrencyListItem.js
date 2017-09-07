@@ -20,8 +20,8 @@ class CurrencyListItem extends React.Component {
     render() {
         return (
             <ListItem dense button key={this.props.data.id}>
-                    <ListItemText secondary={this.props.data.id} />
-                    <ListItemText primary={this.props.data.name} />
+                    <ListItemText key= 's'secondary={this.props.data.id} />
+                    <ListItemText key = 'p' primary={this.props.data.name} />
                     <ListItemSecondaryAction>
                         <Checkbox
                             checked={this.props.data.isActive}
