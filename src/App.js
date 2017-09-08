@@ -23,6 +23,7 @@ class App extends Component
 
         this.state = {
             activeData:{},
+            relativeData:{},
             currencies:[]
         }
 
@@ -79,13 +80,56 @@ class App extends Component
             }
                 
             if(result.data)
-                this.absorbCurrency(this.state.activeData, result.data, id, ['weightedAverage'], isReverted )
+            {
+                let activeData = this.absorbCurrency(this.state.activeData, result.data, id, ['weightedAverage'], isReverted )
+                let relativeData = this.calculateRelativePercentage(activeData, 0)
+                this.setState({
+                    activeData:activeData,
+                    relativeData:relativeData
+                })
+            }
         });
+    }
+
+    calculateRelativePercentage(baseData, referenceIndex)
+    {
+
+        let relativeData = []
+
+        for (var property in baseData)
+        {
+            if (baseData.hasOwnProperty(property))
+            {
+                relativeData[property]=[]
+
+                let referenceRecord =  baseData[property][referenceIndex]
+
+                baseData[property].map((x, index)=>
+                {
+                    let newRecord = {}
+
+                    for (var currency in x)
+                    {
+                        if (x.hasOwnProperty(currency))
+                        {
+                            if(currency === 'date')
+                                newRecord[currency] = x[currency]
+                            else
+                                newRecord[currency] = x[currency]/referenceRecord[currency]
+                        }
+                    }
+
+                    relativeData[property].push(newRecord)
+                })
+            }
+        }
+
+        return relativeData
     }
 
     absorbCurrency(baseData, currencyArray, id, properties, isReverted)
     {
-       let activeData = JSON.parse(JSON.stringify(baseData));
+       let activeData = JSON.parse(JSON.stringify(baseData))
 
         properties.map((property, propertyIndex)=>
         {
@@ -126,8 +170,7 @@ class App extends Component
             })
         })
 
-        this.setState({activeData:activeData})
-        console.log("activeData uploaded", this.state.activeData)
+        return activeData
     }
 
     canBeReverted(property)
@@ -239,7 +282,7 @@ class App extends Component
             <div className="App">
                 
 
-                <LineChart  width={800} height={400} data={this.state.activeData['weightedAverage']} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                <LineChart  width={800} height={400} data={this.state.relativeData['weightedAverage']} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                     
                     {lines}
                     
