@@ -256,6 +256,16 @@ class App extends Component
         }
     }
 
+    onLineClick=(data)=>
+    {
+        let relativeData = this.calculateRelativePercentage(this.state.activeData, data.activeTooltipIndex)
+        
+
+        this.setState({
+            relativeData:relativeData
+        })
+    }
+
     getCurrencyLines=()=>
     {
         let lines = []
@@ -264,7 +274,7 @@ class App extends Component
                 if(this.state.currencies[currencyId].isActive) {
                     //if(this.state.activeData['weightedAverage'][currencyId]) {
                         console.log(currencyId)
-                        lines.push(<Line isAnimationActive ={false} type="monotone" key= {currencyId} dataKey={currencyId} stroke="#8833d8" dot = {false}/>)
+                        lines.push(<Line  isAnimationActive ={false} type="monotone" key= {currencyId} dataKey={currencyId} stroke="#8833d8" dot = {false}/>)
                     //}
                 }      
             }
@@ -282,11 +292,11 @@ class App extends Component
             <div className="App">
                 
 
-                <LineChart  width={800} height={400} data={this.state.relativeData['weightedAverage']} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                <LineChart  onClick = {this.onLineClick} width={800} height={400} data={this.state.relativeData['weightedAverage']} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                     
                     {lines}
                     
-                    <XAxis dataKey="name" />
+                    <XAxis  dataKey="name" />
                     <YAxis />
                     <Tooltip />
                 </LineChart>
