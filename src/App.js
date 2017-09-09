@@ -43,7 +43,7 @@ class App extends Component
 
     downloadCurrency=(id, isReverted = false)=>
     {
-        let days = 30
+        let days = 360
         let delta = days*24*60*60
         let startTimestamp = Date.now()/1000 - delta
         let endTimestamp = Date.now()/1000
@@ -258,6 +258,9 @@ class App extends Component
 
     onLineClick=(data)=>
     {
+        if(!data)
+            return
+        let index = data.activeTooltipIndex
         let relativeData = this.calculateRelativePercentage(this.state.activeData, data.activeTooltipIndex)
         
 
@@ -274,7 +277,7 @@ class App extends Component
                 if(this.state.currencies[currencyId].isActive) {
                     //if(this.state.activeData['weightedAverage'][currencyId]) {
                         console.log(currencyId)
-                        lines.push(<Line  isAnimationActive ={false} type="monotone" key= {currencyId} dataKey={currencyId} stroke="#8833d8" dot = {false}/>)
+                        lines.push(<Line  isAnimationActive ={true} type="monotone" key= {currencyId} dataKey={currencyId} stroke="#8833d8" dot = {false}/>)
                     //}
                 }      
             }
