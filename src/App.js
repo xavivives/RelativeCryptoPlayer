@@ -277,7 +277,7 @@ class App extends Component
         
         let numberOfCurrencies = this.getNumberOfActiveCurrencies()
 
-        let colors = Chroma.scale(['#fff7f3','#ff3366']).mode('hsl').colors(numberOfCurrencies)
+        let colors = Chroma.scale(['#ccc7f3','#ff3366']).mode('hsl').colors(numberOfCurrencies)
 console.log(colors)
         let lines = []
         let colorIndex = 0
