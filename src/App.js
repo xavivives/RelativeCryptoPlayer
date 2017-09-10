@@ -4,8 +4,9 @@ import './App.css';
 import { LineChart, Line ,CartesianGrid, XAxis, YAxis, Tooltip} from 'recharts';
 import Axios from 'axios'
 import CurrenciesList from './CurrenciesList.js'
+import Chroma from 'chroma-js'
 
-const period = 
+const interval = 
 {
     fiveMinutes:300,
     fifteenMinutes:900,
@@ -57,7 +58,7 @@ class App extends Component
                 params:{
                 command: 'returnChartData',
                 currencyPair: currencyPair,
-                period:period.fourHours,
+                period:interval.oneDay,
                 end:endTimestamp,
                 start:startTimestamp
                 }
@@ -143,9 +144,10 @@ class App extends Component
                 let found = false
                 for(let i= 0; i< propertiesArray.length; i++)
                 {
-                    if(currencyRecord.date === propertiesArray[i].date )
+                    if(currencyRecord.date === propertiesArray[i].date)
                     {
                         propertiesArray[i][id] = currencyRecord[property]
+                        console.log('existing', id, property, currencyRecord.date, propertiesArray[i])
                         if(isReverted)
                             if(this.canBeReverted(property))
                                 propertiesArray[i][id] = 1/propertiesArray[i][id]
@@ -157,6 +159,7 @@ class App extends Component
             
                 if(!found)
                 {
+                    console.log('new',id, property, currencyRecord.date)
                     let newRecord = {}
                     newRecord.date = currencyRecord.date
                     newRecord[id] = currencyRecord[property]
@@ -168,9 +171,20 @@ class App extends Component
                     propertiesArray.push(newRecord)
                 }
             })
+
+            propertiesArray=propertiesArray.sort(this.sortByDate)
+               
         })
 
         return activeData
+    }
+
+    sortByDate=(a,b)=>
+    {
+        if(a.date>b.date)
+            return 1
+        else
+            return -1
     }
 
     canBeReverted(property)
@@ -192,8 +206,6 @@ class App extends Component
         let currencies = this.state.currencies
         currencies[data.id].isActive = isOn
         this.setState({currencies:currencies})
-
-        console.log("currency  toggled")
 
         if(isOn)
             this.enableCurrency(data.id)
@@ -236,26 +248,6 @@ class App extends Component
         }).catch((error)=>{console.error(error)});
     }
 
-    getData=()=>
-    {
-        let data = []
-        for (var currency in this.state.currencies) {
-            if (this.state.currencies.hasOwnProperty(currency)) {
-                if(this.state.currencies[currency].isActive) {
-                    if(this.state.currencies[currency].history) {
-                        for(let i = 0; i<this.state.currencies[currency].history.length; i++)
-                        {
-                            if(!data[i])
-                                data[i] = {}
-
-                            data[i][this.state.currencies[currency].id] = this.state.currencies[currency].history[i]
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     onLineClick=(data)=>
     {
         if(!data)
@@ -269,16 +261,33 @@ class App extends Component
         })
     }
 
+    getNumberOfActiveCurrencies=()=>
+    {
+        let activeCurrencies = 0
+         for (var currencyId in this.state.currencies)
+            if (this.state.currencies.hasOwnProperty(currencyId))
+                if(this.state.currencies[currencyId].isActive)
+                    activeCurrencies ++
+
+        return activeCurrencies
+    }
+
     getCurrencyLines=()=>
     {
+        
+        let numberOfCurrencies = this.getNumberOfActiveCurrencies()
+
+        let colors = Chroma.scale(['#fff7f3','#ff3366']).mode('hsl').colors(numberOfCurrencies)
+console.log(colors)
         let lines = []
+        let colorIndex = 0
         for (var currencyId in this.state.currencies) {
+            
             if (this.state.currencies.hasOwnProperty(currencyId)) {
+                
                 if(this.state.currencies[currencyId].isActive) {
-                    //if(this.state.activeData['weightedAverage'][currencyId]) {
-                        console.log(currencyId)
-                        lines.push(<Line  isAnimationActive ={true} type="monotone" key= {currencyId} dataKey={currencyId} stroke="#8833d8" dot = {false}/>)
-                    //}
+                    lines.push(<Line  isAnimationActive ={true} type="monotone" key= {currencyId} dataKey={currencyId} stroke={colors[colorIndex++]} dot = {false}/>)
+
                 }      
             }
         }
@@ -286,22 +295,22 @@ class App extends Component
     }
 
 
-    render() {
-
-        
+    render()
+    {
+     
         let lines = this.getCurrencyLines()
 
         return (
-            <div className="App">
+            <div className="App" style={{backgroundColor:'white'}}>
                 
 
-                <LineChart  onClick = {this.onLineClick} width={800} height={400} data={this.state.relativeData['weightedAverage']} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                <LineChart  onClick = {this.onLineClick} width={window.innerWidth} height={window.innerHeight/2} data={this.state.relativeData['weightedAverage']} margin={{ top: 5, right: 20, bottom: 5, left: 5 }}>
                     
                     {lines}
                     
                     <XAxis  dataKey="name" />
                     <YAxis />
-                    <Tooltip />
+                    <Tooltip wrapperStyleObject = {{backgroundColor:'red'}}/>
                 </LineChart>
 
                 <CurrenciesList  style={{width:200}} data= {this.state.currencies} onToggle={this.onCurrencyToggle}/>
