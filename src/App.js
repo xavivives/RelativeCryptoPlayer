@@ -17,6 +17,12 @@ const interval =
     oneDay:86400
 }
 
+const days = 360
+const delta = days*24*60*60
+const startTimestamp = Date.now()/1000 - delta
+const endTimestamp = Date.now()/1000
+const currentInterval = interval.oneDay
+
 class App extends Component
 {
     constructor (props)
@@ -45,10 +51,7 @@ class App extends Component
 
     downloadCurrency=(id, isReverted = false)=>
     {
-        let days = 360
-        let delta = days*24*60*60
-        let startTimestamp = Date.now()/1000 - delta
-        let endTimestamp = Date.now()/1000
+        
 
         let currencyPair = this.getCurrencyPair(id)
         if(isReverted)
@@ -59,7 +62,7 @@ class App extends Component
                 params:{
                 command: 'returnChartData',
                 currencyPair: currencyPair,
-                period:interval.oneDay,
+                period:currentInterval,
                 end:endTimestamp,
                 start:startTimestamp
                 }
@@ -294,16 +297,28 @@ class App extends Component
         return lines
     }
 
+    onStartDateChanged=(value)=>
+    {
+        console.log('start', value)
+    }
+
+    onEndDateChanged=(value)=>
+    {
+        console.log('end',value)
+    }
+
+    onReferenceDateChanged=(value)=>
+    {
+        console.log('ref',value)
+    }
 
     render()
     {
-     
         let lines = this.getCurrencyLines()
 
         return (
             <div className="App" style={{backgroundColor:'white'}}>
                 
-
                 <LineChart  onClick = {this.onLineClick} width={window.innerWidth} height={window.innerHeight/2} data={this.state.relativeData['weightedAverage']} margin={{ top: 5, right: 20, bottom: 5, left: 5 }}>
                     
                     {lines}
@@ -314,7 +329,16 @@ class App extends Component
                 </LineChart>
 
 
-                  <DateSlider/>
+                  <DateSlider
+                    min = {startTimestamp}
+                    max = {endTimestamp}
+                    interval = {currentInterval}
+                    onStartDateChanged={this.onStartDateChanged}
+                    onEndDateChanged={this.onEndDateChanged}
+                    onReferenceDateChanged={this.onReferenceDateChanged}
+                    startDate={startTimestamp}
+                    endDate={endTimestamp}
+                    referenceDate={(startTimestamp + endTimestamp)/2}/>
 
                 <CurrenciesList  style={{width:200}} data= {this.state.currencies} onToggle={this.onCurrencyToggle}/>
 
