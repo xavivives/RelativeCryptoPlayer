@@ -5,6 +5,7 @@ import { LineChart, Line ,CartesianGrid, XAxis, YAxis, Tooltip} from 'recharts';
 import Axios from 'axios'
 import CurrenciesList from './CurrenciesList.js'
 import Chroma from 'chroma-js'
+import DateSlider from './DateSlider.js'
 
 const interval = 
 {
@@ -278,7 +279,6 @@ class App extends Component
         let numberOfCurrencies = this.getNumberOfActiveCurrencies()
 
         let colors = Chroma.scale(['#ccc7f3','#ff3366']).mode('hsl').colors(numberOfCurrencies)
-console.log(colors)
         let lines = []
         let colorIndex = 0
         for (var currencyId in this.state.currencies) {
@@ -312,6 +312,9 @@ console.log(colors)
                     <YAxis />
                     <Tooltip wrapperStyleObject = {{backgroundColor:'red'}}/>
                 </LineChart>
+
+
+                  <DateSlider/>
 
                 <CurrenciesList  style={{width:200}} data= {this.state.currencies} onToggle={this.onCurrencyToggle}/>
 
