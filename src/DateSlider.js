@@ -51,36 +51,8 @@ class DateSlider extends React.Component {
             if(beforeValues[i] != currenValues[i])
                 return i
 
-        console.log("AAA")
         return -1
     }
-
-    onReferenceChanged=(value, currentIndex)=>
-    {
-        this.setState({
-            'reference':value,
-            'referenceIndex':currentIndex
-        })
-    }
-
-    onStartDateChanged=(value, currentIndex)=>
-    {
-        let referenceIndex = this.state.referenceIndex
-        if(currentIndex ==  this.state.referenceIndex)
-
-
-
-        this.setState({
-            'startDate':value,
-            'referenceIndex':currentIndex
-        })
-    }
-
-    onEndDateChanged=(value, currentIndex)=>
-    {
-        this.setState({'endDate':value})
-    }
-
 
 
     onChange = (values) => {
@@ -88,72 +60,48 @@ class DateSlider extends React.Component {
         let changedIndex = this.getChangedIndex(this.state.beforeValues, values)
         let changingIndex = this.getChangedIndex(this.state.values, values)
 
+        console.log(changedIndex, changingIndex)
 
         let startDate = this.state.startDate
         let endDate = this.state.endDate
         let reference = this.state.reference
-        let referenceIndex = this.state.referenceIndex
 
-
-
-        console.log("in",changedIndex, changingIndex)
-        
         if(changedIndex == -1)
             return
 
-        for(let i=0; i<values.length; i++)
-        {
-            if(changedIndex==values[i])
-                changingIndex = i
-        }
-
         //reference is changing
         if(changedIndex == this.state.beforeReferenceIndex)
-        {
-            console.log("ref")
-            reference = values[changedIndex]
-            referenceIndex = changingIndex
-        }
-
+            reference = values[changingIndex]
+        
         //start date is changing
-        else if(changedIndex<2)
-        {
-            console.log("start")
-            startDate = values[changedIndex]
-
-            if(this.state.referenceIndex == changingIndex)
-            {
-                if(changingIndex == 0)
-                    referenceIndex = 1
-                else  if(changingIndex == 1)
-                    referenceIndex = 0
-            }
-
-        }
+        else if(changedIndex == 0  ||  (changedIndex == 1 && this.state.referenceIndex ==0) )
+            startDate = values[changingIndex]
+        
         //end date is changing
         else
-        {
-            console.log("end")
-            endDate = values[changedIndex]
-            if(this.state.referenceIndex == changingIndex)
-            {
-                if(changingIndex == 1)
-                    referenceIndex = 2
-                
-                else if(changingIndex == 2)
-                    referenceIndex = 1
+            endDate = values[changingIndex]
+        
 
+        let referenceIndex = this.state.referenceIndex
+
+        for(let i=0; i<values.length; i++)
+        {
+            if(values[i]==reference)
+            {
+                referenceIndex = i
+                break
             }
         }
 
 
-
+        //console.log(referenceIndex)
         this.setState({
             values:values,
             startDate: startDate,
             endDate:endDate,
             reference:reference,
-            referenceIndex: referenceIndex
+            referenceIndex:referenceIndex
+
         })
     }
 
@@ -167,15 +115,6 @@ class DateSlider extends React.Component {
         })
     } 
 
-    getValues=()=>
-    {
-        //console.log(this.state.startDate,this.state.reference, this.state.endDate)
-        //let values = [this.state.startDate,this.state.endDate]
-        //values.splice(this.state.referenceIndex, 0, this.state.reference)    
-        //console.log('render',values)
-        return [this.state.startDate, this.state.reference, this.state.endDate]
-    }
-
     getHandleStyles=()=>
     {
         let baseColor = 'blue'
@@ -186,10 +125,7 @@ class DateSlider extends React.Component {
     }
 
     render() {
-        let values = this.getValues()
 
-       //console.log(values)
-        
         return (
             <div style={style}>
                 <Range
