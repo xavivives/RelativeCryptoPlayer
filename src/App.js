@@ -32,7 +32,9 @@ class App extends Component
         this.state = {
             activeData:{},
             relativeData:{},
-            currencies:[]
+            currencies:[],
+            startDate:startTimestamp,
+            endDate:endTimestamp
         }
 
         /*
@@ -132,6 +134,16 @@ class App extends Component
         return relativeData
     }
 
+    getIndexByDate(baseData, date)
+    {
+
+    }
+
+    trimData(baseData, startDate, endDate)
+    {
+
+    }
+
     absorbCurrency(baseData, currencyArray, id, properties, isReverted)
     {
        let activeData = JSON.parse(JSON.stringify(baseData))
@@ -151,7 +163,7 @@ class App extends Component
                     if(currencyRecord.date === propertiesArray[i].date)
                     {
                         propertiesArray[i][id] = currencyRecord[property]
-                        console.log('existing', id, property, currencyRecord.date, propertiesArray[i])
+                        
                         if(isReverted)
                             if(this.canBeReverted(property))
                                 propertiesArray[i][id] = 1/propertiesArray[i][id]
@@ -299,17 +311,17 @@ class App extends Component
 
     onStartDateChanged=(value)=>
     {
-        console.log('start', value)
+        this.setState({startDate:value})
     }
 
     onEndDateChanged=(value)=>
     {
-        console.log('end',value)
+        this.setState({endDate:value})
     }
 
     onReferenceDateChanged=(value)=>
     {
-        console.log('ref',value)
+        this.setState({referenseDate:value})
     }
 
     render()
@@ -319,7 +331,11 @@ class App extends Component
         return (
             <div className="App" style={{backgroundColor:'white'}}>
                 
-                <LineChart  onClick = {this.onLineClick} width={window.innerWidth} height={window.innerHeight/2} data={this.state.relativeData['weightedAverage']} margin={{ top: 5, right: 20, bottom: 5, left: 5 }}>
+                <LineChart  onClick = {this.onLineClick}
+                    width={window.innerWidth}
+                    height={window.innerHeight/2}
+                    data={this.state.relativeData['weightedAverage']}
+                    margin={{ top: 5, right: 20, bottom: 5, left: 5 }}>
                     
                     {lines}
                     
@@ -328,7 +344,6 @@ class App extends Component
                     <Tooltip wrapperStyleObject = {{backgroundColor:'red'}}/>
                 </LineChart>
 
-
                   <DateSlider
                     min = {startTimestamp}
                     max = {endTimestamp}
@@ -336,11 +351,14 @@ class App extends Component
                     onStartDateChanged={this.onStartDateChanged}
                     onEndDateChanged={this.onEndDateChanged}
                     onReferenceDateChanged={this.onReferenceDateChanged}
-                    startDate={startTimestamp}
-                    endDate={endTimestamp}
+                    startDate={this.state.startDate}
+                    endDate={this.state.endDate}
                     referenceDate={(startTimestamp + endTimestamp)/2}/>
 
-                <CurrenciesList  style={{width:200}} data= {this.state.currencies} onToggle={this.onCurrencyToggle}/>
+                <CurrenciesList 
+                    style={{width:200}}
+                    data= {this.state.currencies}
+                    onToggle={this.onCurrencyToggle}/>
 
             </div>
         );
