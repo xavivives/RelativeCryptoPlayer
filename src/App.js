@@ -30,7 +30,7 @@ class App extends Component
         super()
 
         this.state = {
-            activeData:{},
+            baseData:{},
             relativeData:{},
             currencies:[],
             startDate:startTimestamp,
@@ -40,7 +40,7 @@ class App extends Component
         /*
         //Format example:
 
-        activeData:{
+        baseData:{
             'weightedAverage':[{'BTC_XMR':1,'BTC_ETH':2,'date':123}],
             'volume':[{'BTC_XMR':1,'BTC_ETH':2,'date':123}],
             'relativeAvarage':[{'BTC_XMR':1,'BTC_ETH':2,'date':123}],
@@ -53,8 +53,6 @@ class App extends Component
 
     downloadCurrency=(id, isReverted = false)=>
     {
-        
-
         let currencyPair = this.getCurrencyPair(id)
         if(isReverted)
             currencyPair = this.getRevertedCurrencyPair(id)
@@ -70,7 +68,6 @@ class App extends Component
                 }
         })
         .then((result)=> {
-            console.log(result)
             if(result.data.error)
             {   
                 if (result.data.error === "Invalid currency pair." && isReverted === false)
@@ -88,19 +85,52 @@ class App extends Component
                 
             if(result.data)
             {
-                let activeData = this.absorbCurrency(this.state.activeData, result.data, id, ['weightedAverage'], isReverted )
-                let relativeData = this.calculateRelativePercentage(activeData, 0)
+                let baseData = this.absorbCurrency(this.state.baseData, result.data, id, ['weightedAverage'], isReverted )
+                let relativeData = this.getRelativeData(this.getData('weightedAverage'), 0)
                 this.setState({
-                    activeData:activeData,
+                    baseData:baseData,
                     relativeData:relativeData
                 })
             }
         });
     }
 
+    getData=(property)=>
+    {
+        if(this.state.baseData[property])
+            return this.state.baseData[property]
+        console.error('Property '+ property +' doesn\'t exist')
+    }
+
+    getRelativeData=(data, referenceIndex)=>
+    {
+        console.log(data)
+        let relativeData = []
+        let referenceRecord =  data[referenceIndex]
+
+        data.map((x, index)=>
+        {
+            let newRecord = {}
+
+            for (var currency in x)
+            {
+                if (x.hasOwnProperty(currency))
+                {
+                    if(currency === 'date')
+                        newRecord[currency] = x[currency]
+                    else
+                        newRecord[currency] = x[currency]/referenceRecord[currency]
+                }
+            }
+
+            relativeData.push(newRecord)
+        })
+
+        return relativeData
+    }
+
     calculateRelativePercentage(baseData, referenceIndex)
     {
-
         let relativeData = []
 
         for (var property in baseData)
@@ -146,14 +176,12 @@ class App extends Component
 
     absorbCurrency(baseData, currencyArray, id, properties, isReverted)
     {
-       let activeData = JSON.parse(JSON.stringify(baseData))
-
         properties.map((property, propertyIndex)=>
         {
-            if(!activeData[property])
-                activeData[property] = []
+            if(!baseData[property])
+                baseData[property] = []
 
-            let propertiesArray = activeData[property]
+            let propertiesArray = baseData[property]
 
             currencyArray.map((currencyRecord, currencyRecordIndex)=>
             {
@@ -175,7 +203,6 @@ class App extends Component
             
                 if(!found)
                 {
-                    console.log('new',id, property, currencyRecord.date)
                     let newRecord = {}
                     newRecord.date = currencyRecord.date
                     newRecord[id] = currencyRecord[property]
@@ -192,7 +219,7 @@ class App extends Component
                
         })
 
-        return activeData
+        return baseData
     }
 
     sortByDate=(a,b)=>
@@ -269,9 +296,9 @@ class App extends Component
         if(!data)
             return
         let index = data.activeTooltipIndex
-        let relativeData = this.calculateRelativePercentage(this.state.activeData, data.activeTooltipIndex)
-        
-
+        let relativeData = this.getRelativeData(this.getData('weightedAverage'), data.activeTooltipIndex )
+        //let relativeData = this.calculateRelativePercentage(this.state.baseData, data.activeTooltipIndex)
+  
         this.setState({
             relativeData:relativeData
         })
@@ -334,7 +361,7 @@ class App extends Component
                 <LineChart  onClick = {this.onLineClick}
                     width={window.innerWidth}
                     height={window.innerHeight/2}
-                    data={this.state.relativeData['weightedAverage']}
+                    data={this.state.relativeData}
                     margin={{ top: 5, right: 20, bottom: 5, left: 5 }}>
                     
                     {lines}
