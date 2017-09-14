@@ -129,52 +129,30 @@ class App extends Component
         return relativeData
     }
 
-    calculateRelativePercentage(baseData, referenceIndex)
+    getIndexByDate=(data, date)=>
     {
-        let relativeData = []
+        let previousDate
 
-        for (var property in baseData)
+        for (let i = 0; i<data.length; i++)
         {
-            if (baseData.hasOwnProperty(property))
-            {
-                relativeData[property]=[]
+            if(data[i].date === date)
+                return i
 
-                let referenceRecord =  baseData[property][referenceIndex]
+            if(date> previousDate && date < data[i].date)
+                return i
 
-                baseData[property].map((x, index)=>
-                {
-                    let newRecord = {}
-
-                    for (var currency in x)
-                    {
-                        if (x.hasOwnProperty(currency))
-                        {
-                            if(currency === 'date')
-                                newRecord[currency] = x[currency]
-                            else
-                                newRecord[currency] = x[currency]/referenceRecord[currency]
-                        }
-                    }
-
-                    relativeData[property].push(newRecord)
-                })
-            }
+            previousDate = data[i].date
         }
-
-        return relativeData
     }
 
-    getIndexByDate(baseData, date)
-    {
-
+    getTrimmedData=(data, startDate, endDate)=>
+    { 
+        let startIndex = this.getIndexByDate(startDate)
+        let endIndex = this.getIndexByDate(endDate)
+        return data.slice(startIndex, endIndex)
     }
 
-    trimData(baseData, startDate, endDate)
-    {
-
-    }
-
-    absorbCurrency(baseData, currencyArray, id, properties, isReverted)
+    absorbCurrency=(baseData, currencyArray, id, properties, isReverted)=>
     {
         properties.map((property, propertyIndex)=>
         {
@@ -230,7 +208,7 @@ class App extends Component
             return -1
     }
 
-    canBeReverted(property)
+    canBeReverted=(property)=>
     {
         if(property ==='weightedAverage')
             return true
