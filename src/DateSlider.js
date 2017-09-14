@@ -66,40 +66,37 @@ class DateSlider extends React.Component {
         let reference = this.state.reference
         let referenceIndex = this.state.referenceIndex
 
-        console.log(changingIndex, changedIndex)
-
-        if(changedIndex == -1)
+        if(changedIndex === -1 || changingIndex === -1)
             return
 
         //reference is changing
-        if(changedIndex == this.state.beforeReferenceIndex)
-        {
+        if(changedIndex === this.state.beforeReferenceIndex)
             reference = values[changingIndex]
-        }
         
         //start date is changing
-        else if(changedIndex == 0  ||  (changedIndex == 1 && this.state.referenceIndex ==0) )
-        {
-            if(changingIndex !== -1)
-            {
-                startDate = values[changingIndex]
-            }
-        }
+        else if(changedIndex === 0  ||  (changedIndex === 1 && this.state.referenceIndex === 0) )
+            startDate = values[changingIndex]
         
         //end date is changing
-        else if(changingIndex !== -1)
-        {
-                endDate = values[changingIndex]
-        }
+        else
+            endDate = values[changingIndex]
+        
         
 
         for(let i=0; i<values.length; i++)
         {
-            if(values[i]==reference)
+            if(values[i]===reference)
             {
                 referenceIndex = i
                 break
             }
+        }
+
+        if(endDate < startDate)
+        {
+            let date = endDate
+            endDate = startDate
+            startDate = date
         }
 
         if(startDate!= this.state.startDate)

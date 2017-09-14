@@ -118,6 +118,8 @@ class App extends Component
     getRelativeData=(data, referenceDate)=>
     {
         let referenceIndex = this.getIndexByDate(data, referenceDate)
+        if(referenceIndex === -1)
+            console.error(-1)
         let relativeData = []
         let referenceRecord =  data[referenceIndex]
 
@@ -345,12 +347,13 @@ class App extends Component
 
     onEndDateChanged=(value)=>
     {
-        console.log(value)
+
         this.setState({endDate:value})
     }
 
     onReferenceDateChanged=(value)=>
     {
+        console.log(value)
         this.setState({referenceDate:value})
     }
 
