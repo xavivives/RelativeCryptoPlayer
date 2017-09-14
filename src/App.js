@@ -339,17 +339,19 @@ class App extends Component
 
     onStartDateChanged=(value)=>
     {
+
         this.setState({startDate:value})
     }
 
     onEndDateChanged=(value)=>
     {
+        console.log(value)
         this.setState({endDate:value})
     }
 
     onReferenceDateChanged=(value)=>
     {
-        this.setState({referenseDate:value})
+        this.setState({referenceDate:value})
     }
 
     render()
