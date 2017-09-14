@@ -17,6 +17,10 @@ const interval =
     oneDay:86400
 }
 
+const properties =
+{
+    weightedAverage:'weightedAverage'
+}
 const days = 360
 const delta = days*24*60*60
 const startTimestamp = Date.now()/1000 - delta
@@ -34,7 +38,8 @@ class App extends Component
             relativeData:{},
             currencies:[],
             startDate:startTimestamp,
-            endDate:endTimestamp
+            endDate:endTimestamp,
+            referenceDate: startTimestamp
         }
 
         /*
@@ -85,41 +90,49 @@ class App extends Component
                 
             if(result.data)
             {
-                let baseData = this.absorbCurrency(this.state.baseData, result.data, id, ['weightedAverage'], isReverted )
-                let relativeData = this.getRelativeData(this.getData('weightedAverage'), 0)
+                let baseData = this.absorbCurrency(this.state.baseData, result.data, id, [properties.weightedAverage], isReverted )
                 this.setState({
                     baseData:baseData,
-                    relativeData:relativeData
                 })
             }
         });
+    }
+
+    calculateData=(property, startDate, endDate, referenceDate)=>
+    {
+        console.log(property, startDate, endDate, referenceDate)
+        let data = this.getData(property)
+        data = this.getTrimmedData(data, startDate, endDate)
+        data = this.getRelativeData(data, referenceDate)
+        return  data
     }
 
     getData=(property)=>
     {
         if(this.state.baseData[property])
             return this.state.baseData[property]
-        console.error('Property '+ property +' doesn\'t exist')
+
+       return[]
     }
 
-    getRelativeData=(data, referenceIndex)=>
+    getRelativeData=(data, referenceDate)=>
     {
-        console.log(data)
+        let referenceIndex = this.getIndexByDate(data, referenceDate)
         let relativeData = []
         let referenceRecord =  data[referenceIndex]
 
-        data.map((x, index)=>
+        data.map((record, index)=>
         {
             let newRecord = {}
 
-            for (var currency in x)
+            for (var currency in record)
             {
-                if (x.hasOwnProperty(currency))
+                if (record.hasOwnProperty(currency))
                 {
                     if(currency === 'date')
-                        newRecord[currency] = x[currency]
+                        newRecord[currency] = record[currency]
                     else
-                        newRecord[currency] = x[currency]/referenceRecord[currency]
+                        newRecord[currency] = record[currency]/referenceRecord[currency]
                 }
             }
 
@@ -131,7 +144,7 @@ class App extends Component
 
     getIndexByDate=(data, date)=>
     {
-        let previousDate
+        let previousDate = -1
 
         for (let i = 0; i<data.length; i++)
         {
@@ -141,14 +154,26 @@ class App extends Component
             if(date> previousDate && date < data[i].date)
                 return i
 
+            if(date<data[i].date && previousDate == -1)
+                return 0
+
+            if(i == data.length-1)
+                return data.length
+
             previousDate = data[i].date
         }
+        return -1
+    }
+
+    getDateByIndex = (data, index)=>
+    {
+        return data[index].date
     }
 
     getTrimmedData=(data, startDate, endDate)=>
     { 
-        let startIndex = this.getIndexByDate(startDate)
-        let endIndex = this.getIndexByDate(endDate)
+        let startIndex = this.getIndexByDate(data,startDate)
+        let endIndex = this.getIndexByDate(data, endDate)
         return data.slice(startIndex, endIndex)
     }
 
@@ -242,7 +267,6 @@ class App extends Component
         return id+'_BTC'
     }
 
-
     getCurrencyPairs=()=>
     {
         //"https://poloniex.com/public?command=returnCurrencies"
@@ -274,11 +298,11 @@ class App extends Component
         if(!data)
             return
         let index = data.activeTooltipIndex
-        let relativeData = this.getRelativeData(this.getData('weightedAverage'), data.activeTooltipIndex )
+        //let relativeData = this.getRelativeData(this.getData('weightedAverage'),  )
         //let relativeData = this.calculateRelativePercentage(this.state.baseData, data.activeTooltipIndex)
   
         this.setState({
-            relativeData:relativeData
+            referenceDate:this.getDateByIndex(this.getData(properties.weightedAverage), index)
         })
     }
 
@@ -297,7 +321,6 @@ class App extends Component
     {
         
         let numberOfCurrencies = this.getNumberOfActiveCurrencies()
-
         let colors = Chroma.scale(['#ccc7f3','#ff3366']).mode('hsl').colors(numberOfCurrencies)
         let lines = []
         let colorIndex = 0
@@ -306,7 +329,7 @@ class App extends Component
             if (this.state.currencies.hasOwnProperty(currencyId)) {
                 
                 if(this.state.currencies[currencyId].isActive) {
-                    lines.push(<Line  isAnimationActive ={true} type="monotone" key= {currencyId} dataKey={currencyId} stroke={colors[colorIndex++]} dot = {false}/>)
+                    lines.push(<Line  isAnimationActive ={false} type="monotone" key= {currencyId} dataKey={currencyId} stroke={colors[colorIndex++]} dot = {false}/>)
 
                 }      
             }
@@ -331,6 +354,7 @@ class App extends Component
 
     render()
     {
+        let data = this.calculateData('weightedAverage', this.state.startDate, this.state.endDate, this.state.referenceDate)
         let lines = this.getCurrencyLines()
 
         return (
@@ -339,7 +363,7 @@ class App extends Component
                 <LineChart  onClick = {this.onLineClick}
                     width={window.innerWidth}
                     height={window.innerHeight/2}
-                    data={this.state.relativeData}
+                    data={data}
                     margin={{ top: 5, right: 20, bottom: 5, left: 5 }}>
                     
                     {lines}

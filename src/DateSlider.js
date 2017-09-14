@@ -132,8 +132,6 @@ class DateSlider extends React.Component {
     }
 
     render() {
-
-        console.log(this.state.values)
         return (
             <div style={{margin: 50 }}>
                 <Range
