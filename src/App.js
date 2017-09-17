@@ -39,7 +39,7 @@ class App extends Component
             currencies:[],
             startDate:startTimestamp,
             endDate:endTimestamp,
-            referenceDate: startTimestamp
+            referenceDate: Math.floor((startTimestamp + endTimestamp)/2)
         }
 
         /*
@@ -309,9 +309,7 @@ class App extends Component
         if(!data)
             return
         let index = data.activeTooltipIndex
-        //let relativeData = this.getRelativeData(this.getData('weightedAverage'),  )
-        //let relativeData = this.calculateRelativePercentage(this.state.baseData, data.activeTooltipIndex)
-  
+
         this.setState({
             referenceDate:this.getDateByIndex(this.getData(properties.weightedAverage), index)
         })
@@ -330,7 +328,6 @@ class App extends Component
 
     getCurrencyLines=()=>
     {
-        
         let numberOfCurrencies = this.getNumberOfActiveCurrencies()
         let colors = Chroma.scale(['#ccc7f3','#ff3366']).mode('hsl').colors(numberOfCurrencies)
         let lines = []
@@ -393,7 +390,7 @@ class App extends Component
                     onReferenceDateChanged={this.onReferenceDateChanged}
                     startDate={this.state.startDate}
                     endDate={this.state.endDate}
-                    referenceDate={Math.floor((startTimestamp + endTimestamp)/2)}/>
+                    referenceDate={this.state.referenceDate}/>
 
                 <CurrenciesList 
                     style={{width:200}}

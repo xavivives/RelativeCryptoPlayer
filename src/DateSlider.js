@@ -12,6 +12,16 @@ class DateSlider extends React.Component {
     constructor(props) {
         super(props)
 
+        this.setStateFromProps(props)
+    }
+
+    componentWillReceiveProps=(nextProps)=> 
+    {
+        this.setStateFromProps(nextProps)
+    }
+
+    setStateFromProps=(props)=>
+    {
         let referenceIndex = 1
         if(props.referenceDate>props.endDate)
             referenceIndex = 2
@@ -30,11 +40,7 @@ class DateSlider extends React.Component {
             beforeReferenceIndex:referenceIndex,
             beforeValues:values,
             values:values
-        };
-    }
-
-    componentWillReceiveProps=(nextProps)=> 
-    {
+        }
     }
 
     getChangedIndex=(beforeValues, currenValues)=>
