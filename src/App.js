@@ -102,8 +102,9 @@ class App extends Component
     {
         console.log(property, startDate, endDate, referenceDate)
         let data = this.getData(property)
+        let referenceRecord = this.getReferenceRecordByDate(data, referenceDate)
         data = this.getTrimmedData(data, startDate, endDate)
-        data = this.getRelativeData(data, referenceDate)
+        data = this.getRelativeData(data, referenceRecord)
         return  data
     }
 
@@ -115,13 +116,22 @@ class App extends Component
        return[]
     }
 
-    getRelativeData=(data, referenceDate)=>
+    getReferenceRecordByDate=(data,referenceDate)=>
     {
         let referenceIndex = this.getIndexByDate(data, referenceDate)
         if(referenceIndex === -1)
-            console.error(-1)
-        let relativeData = []
+            console.error('No index for reference date: '+referenceDate)
+        
         let referenceRecord =  data[referenceIndex]
+        if(!referenceRecord)
+            console.error('No record for reference index: '+referenceIndex)
+
+        return referenceRecord
+    }
+
+    getRelativeData=(data, referenceRecord)=>
+    {
+        let relativeData = []
 
         data.map((record, index)=>
         {
