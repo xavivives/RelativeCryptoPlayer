@@ -120,8 +120,6 @@ class DateSlider extends React.Component {
         if(endDate!= this.state.endDate)
             this.props.onEndDateChanged(endDate)
         
-
-        //console.log(referenceIndex)
         this.setState({
             values:values,
             startDate: startDate,
@@ -134,8 +132,6 @@ class DateSlider extends React.Component {
 
     onBeforeChange=(values)=>
     {  
-        //console.log('before',values)
-        
         this.setState({
             beforeReferenceIndex:this.state.referenceIndex,
             beforeValues:values
@@ -169,7 +165,6 @@ class DateSlider extends React.Component {
     }
 
     render() {
-        console.log(this.state)
         return (
             <div style={{margin: 50 }}>
                 <Range
