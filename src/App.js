@@ -397,7 +397,7 @@ class App extends Component
                     onReferenceDateChanged={this.onReferenceDateChanged}
                     startDate={this.state.startDate}
                     endDate={this.state.endDate}
-                    referenceDate={(startTimestamp + endTimestamp)/2}/>
+                    referenceDate={Math.floor((startTimestamp + endTimestamp)/2)}/>
 
                 <CurrenciesList 
                     style={{width:200}}

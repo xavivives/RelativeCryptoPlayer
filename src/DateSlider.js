@@ -6,23 +6,30 @@ const Range = Slider.Range
 
 const unselectedColor='#dddddd'
 const rangeColor = '#71d2ed'
-const referenceColor = 'yellow'
+const referenceColor = '#ff3366'
 
 class DateSlider extends React.Component {
     constructor(props) {
         super(props)
 
+        let referenceIndex = 1
+        if(props.referenceDate>props.endDate)
+            referenceIndex = 2
+        else if (props.referenceDate<props.startDate)
+            referenceIndex = 0
+
+        let values = [props.startDate, props.endDate]
+        values .splice(referenceIndex, 0, props.referenceDate)
+
         this.state =
         {
-            min:0,
-            max:100,
             startDate: props.startDate,
             endDate:props.endDate,
             reference:props.referenceDate,
-            referenceIndex:1,
-            beforeReferenceIndex:1,
-            beforeValues:[],
-            values:[props.startDate, props.referenceDate, props.endDate]
+            referenceIndex:referenceIndex,
+            beforeReferenceIndex:referenceIndex,
+            beforeValues:values,
+            values:values
         };
     }
 
@@ -162,6 +169,7 @@ class DateSlider extends React.Component {
     }
 
     render() {
+        console.log(this.state)
         return (
             <div style={{margin: 50 }}>
                 <Range
