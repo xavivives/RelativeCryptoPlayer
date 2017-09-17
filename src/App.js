@@ -169,8 +169,8 @@ class App extends Component
             if(date<data[i].date && previousDate == -1)
                 return 0
 
-            if(i == data.length-1)
-                return data.length
+            if(i >= data.length-1)
+                return data.length-1
 
             previousDate = data[i].date
         }
