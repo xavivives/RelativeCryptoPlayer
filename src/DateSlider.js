@@ -4,6 +4,10 @@ import 'rc-slider/assets/index.css'
 
 const Range = Slider.Range
 
+const unselectedColor='#dddddd'
+const rangeColor = '#71d2ed'
+const referenceColor = 'yellow'
+
 class DateSlider extends React.Component {
     constructor(props) {
         super(props)
@@ -133,11 +137,28 @@ class DateSlider extends React.Component {
 
     getHandleStyles=()=>
     {
-        let baseColor = 'blue'
-        let referenceColor = 'yellow'
-        let handles = [{ backgroundColor: baseColor }, { backgroundColor: baseColor }, { backgroundColor: baseColor }]
-        handles[this.state.referenceIndex].backgroundColor = referenceColor
+        let handles = [
+            { backgroundColor: rangeColor, borderColor: rangeColor},
+            { backgroundColor: rangeColor, borderColor: rangeColor},
+            { backgroundColor: rangeColor, borderColor: rangeColor}]
+        handles[this.state.referenceIndex] = { backgroundColor: referenceColor, borderColor: referenceColor}
         return handles
+    }
+
+    getTrackStyles=()=>
+    {
+        let rails = [
+            { backgroundColor: rangeColor },
+            { backgroundColor: rangeColor },
+            { backgroundColor: rangeColor }
+            ]
+
+        if(this.state.referenceIndex == 0)
+            rails[0] = { backgroundColor: unselectedColor }
+        else if(this.state.referenceIndex == 2)
+             rails[1] = { backgroundColor: unselectedColor }
+        
+        return rails
     }
 
     render() {
@@ -150,9 +171,9 @@ class DateSlider extends React.Component {
                     value={this.state.values}
                     onChange={this.onChange}
                     onBeforeChange={this.onBeforeChange}
-                    trackStyle={[{ backgroundColor: 'red' }, { backgroundColor: 'green' }]}
+                    trackStyle={this.getTrackStyles()}
                     handleStyle={this.getHandleStyles()}
-                    railStyle={{ backgroundColor: 'grey' }}
+                    railStyle={{ backgroundColor: unselectedColor }}
                     />
             </div>
         )
