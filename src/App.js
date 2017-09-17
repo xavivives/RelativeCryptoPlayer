@@ -1,11 +1,13 @@
-import React, { Component } from 'react';
-import unga from './unga.js';    
-import './App.css';
-import { LineChart, Line ,CartesianGrid, XAxis, YAxis, Tooltip} from 'recharts';
+import React, { Component } from 'react'
+import unga from './unga.js'
+import './App.css'
+import { LineChart, Line ,CartesianGrid, XAxis, YAxis, Tooltip} from 'recharts'
 import Axios from 'axios'
 import CurrenciesList from './CurrenciesList.js'
 import Chroma from 'chroma-js'
 import DateSlider from './DateSlider.js'
+import DatePicker from 'material-ui/DatePicker'
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 
 const interval = 
 {
@@ -39,7 +41,9 @@ class App extends Component
             currencies:[],
             startDate:startTimestamp,
             endDate:endTimestamp,
-            referenceDate: Math.floor((startTimestamp + endTimestamp)/2)
+            referenceDate: Math.floor((startTimestamp + endTimestamp)/2),
+            graphWidth: window.innerWidth,
+            graphHeight:window.innerHeight/2
         }
 
         /*
@@ -366,11 +370,12 @@ class App extends Component
         let lines = this.getCurrencyLines()
 
         return (
+            <MuiThemeProvider>
             <div className="App" style={{backgroundColor:'white'}}>
                 
                 <LineChart  onClick = {this.onLineClick}
-                    width={window.innerWidth}
-                    height={window.innerHeight/2}
+                    width={this.state.graphWidth}
+                    height={this.state.graphHeight}
                     data={data}
                     margin={{ top: 5, right: 20, bottom: 5, left: 5 }}>
                     
@@ -381,7 +386,11 @@ class App extends Component
                     <Tooltip wrapperStyleObject = {{backgroundColor:'red'}}/>
                 </LineChart>
 
-                  <DateSlider
+                 <div>
+                    <DatePicker hintText="Open to Year" openToYearSelection={true} />
+                </div>
+
+                <DateSlider
                     min = {startTimestamp}
                     max = {endTimestamp}
                     interval = {currentInterval}
@@ -396,9 +405,9 @@ class App extends Component
                     style={{width:200}}
                     data= {this.state.currencies}
                     onToggle={this.onCurrencyToggle}/>
-
             </div>
-        );
+            </MuiThemeProvider>
+        )
     }
 }
 

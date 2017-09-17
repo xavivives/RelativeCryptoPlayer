@@ -2,6 +2,7 @@ import React from 'react'
 import { withStyles } from 'material-ui/styles'
 import List, { ListItem, ListItemSecondaryAction, ListItemText } from 'material-ui/List'
 import Checkbox from 'material-ui/Checkbox'
+import Toggle from 'material-ui/Toggle';
 
 
 class CurrencyListItem extends React.Component {
@@ -19,17 +20,15 @@ class CurrencyListItem extends React.Component {
 
     render() {
         return (
-            <ListItem dense button key={this.props.data.id}>
-                    <ListItemText key= 's'secondary={this.props.data.id} />
-                    <ListItemText key = 'p' primary={this.props.data.name} />
-                    <ListItemSecondaryAction>
-                        <Checkbox
-                            checked={this.props.data.isActive}
-                            onChange={this.onToggle}
-                        />
-                    </ListItemSecondaryAction>
-              </ListItem>
-        )
+            <ListItem
+                key={this.props.data.id}
+                primaryText={this.props.data.name}
+                rightToggle={
+                    <Toggle
+                        toogled={this.props.data.isActive}
+                        onToggle={this.onToggle}
+                    />}
+                secondaryText={this.props.data.id}/>        )
     }
 }
 

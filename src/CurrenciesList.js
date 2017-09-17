@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 import { withStyles } from 'material-ui/styles'
 import List, { ListItem, ListItemSecondaryAction, ListItemText } from 'material-ui/List'
 import Checkbox from 'material-ui/Checkbox'
-import Input from 'material-ui/Input/Input'
+import TextField from 'material-ui/TextField';
 import CurrencyListItem from './CurrencyListItem.js'
 
 class CurrenciesList extends React.Component
@@ -66,9 +66,8 @@ class CurrenciesList extends React.Component
 
     return (
       <div >
-        <Input
+        <TextField
             placeholder="Search"
-            inputProps={{'aria-label': 'Description',}}
             onChange={this.onSearchChange}/>
         <List>
             {list}
