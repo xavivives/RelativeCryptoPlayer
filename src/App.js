@@ -350,7 +350,7 @@ class App extends Component
 
     onStartDateChanged=(value)=>
     {
-        zthis.setState({startDate:value})
+        this.setState({startDate:value})
     }
 
     onEndDateChanged=(value)=>
