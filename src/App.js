@@ -21,7 +21,7 @@ const properties =
 {
     weightedAverage:'weightedAverage'
 }
-const days = 360
+const days = 4*360
 const delta = days*24*60*60
 const startTimestamp = Date.now()/1000 - delta
 const endTimestamp = Date.now()/1000
@@ -100,7 +100,6 @@ class App extends Component
 
     calculateData=(property, startDate, endDate, referenceDate)=>
     {
-        console.log(property, startDate, endDate, referenceDate)
         let data = this.getData(property)
         let referenceRecord = this.getReferenceRecordByDate(data, referenceDate)
         data = this.getTrimmedData(data, startDate, endDate)
@@ -351,19 +350,16 @@ class App extends Component
 
     onStartDateChanged=(value)=>
     {
-
-        this.setState({startDate:value})
+        zthis.setState({startDate:value})
     }
 
     onEndDateChanged=(value)=>
     {
-
         this.setState({endDate:value})
     }
 
     onReferenceDateChanged=(value)=>
     {
-        console.log(value)
         this.setState({referenceDate:value})
     }
 
