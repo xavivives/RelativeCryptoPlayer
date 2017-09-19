@@ -5,9 +5,8 @@ import Checkbox from 'material-ui/Checkbox'
 import Toggle from 'material-ui/Toggle';
 
 
-class CurrencyListItem extends React.Component {
-
-
+class CurrencyListItem extends React.Component
+{
     constructor(props)
     {
         super()

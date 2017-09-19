@@ -105,6 +105,8 @@ class App extends Component
     calculateData=(property, startDate, endDate, referenceDate)=>
     {
         let data = this.getData(property)
+        if(data.length === 0)
+            return
         let referenceRecord = this.getReferenceRecordByDate(data, referenceDate)
         data = this.getTrimmedData(data, startDate, endDate)
         data = this.getRelativeData(data, referenceRecord)
@@ -349,6 +351,13 @@ class App extends Component
         return lines
     }
 
+    onPickerStartDateChanged=(x, date)=>
+    {
+        let value = date.getTime()/1000
+        this.setState({startDate:value})
+        console.log(value)
+    }
+
     onStartDateChanged=(value)=>
     {
         this.setState({startDate:value})
@@ -361,7 +370,20 @@ class App extends Component
 
     onReferenceDateChanged=(value)=>
     {
+        console.log(value)
         this.setState({referenceDate:value})
+    }
+
+    secondsToDate=(seconds)=>
+    {
+        if(!seconds)
+            return new Date()
+        return new Date(Math.floor(seconds)*1000)
+    }
+
+    dateToSeconds=(date)=>
+    {
+        return date.toTime()/1000
     }
 
     render()
@@ -387,7 +409,14 @@ class App extends Component
                 </LineChart>
 
                  <div>
-                    <DatePicker hintText="Open to Year" openToYearSelection={true} />
+                    <DatePicker
+                        hintText="Start date"
+                        value = {this.secondsToDate(this.state.startDate)}
+                        minDate = {this.secondsToDate(startTimestamp)}
+                        maxDate = {this.secondsToDate(endTimestamp)}
+                        onChange={this.onPickerStartDateChanged}/>
+                    <DatePicker hintText="End date" value = {this.secondsToDate(this.state.endDate)}/>
+                    <DatePicker hintText="Reference" value= {this.secondsToDate(this.state.reference)}/>
                 </div>
 
                 <DateSlider
