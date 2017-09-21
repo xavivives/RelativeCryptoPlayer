@@ -414,9 +414,24 @@ class App extends Component
                         value = {this.secondsToDate(this.state.startDate)}
                         minDate = {this.secondsToDate(startTimestamp)}
                         maxDate = {this.secondsToDate(endTimestamp)}
-                        onChange={this.onPickerStartDateChanged}/>
-                    <DatePicker hintText="End date" value = {this.secondsToDate(this.state.endDate)}/>
-                    <DatePicker hintText="Reference" value= {this.secondsToDate(this.state.reference)}/>
+                        onChange={this.onPickerStartDateChanged}
+                        openToYearSelection={true}
+                        hideCalendarDate={true}/>
+                    <DatePicker
+                        hintText="End date"
+                        minDate = {this.secondsToDate(startTimestamp)}
+                        maxDate = {this.secondsToDate(endTimestamp)}
+                        value = {this.secondsToDate(this.state.endDate)}
+                        openToYearSelection={true}
+                        hideCalendarDate={true}/>
+
+                    <DatePicker
+                        hintText="Reference"
+                        minDate = {this.secondsToDate(startTimestamp)}
+                        maxDate = {this.secondsToDate(endTimestamp)}
+                        value= {this.secondsToDate(this.state.referenceDate)}
+                        openToYearSelection={true}
+                        hideCalendarDate={true}/>
                 </div>
 
                 <DateSlider
