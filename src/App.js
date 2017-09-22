@@ -8,6 +8,7 @@ import Chroma from 'chroma-js'
 import DateSlider from './DateSlider.js'
 import DatePicker from 'material-ui/DatePicker'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
+import QueryString from 'query-string'
 
 const interval = 
 {
@@ -25,6 +26,9 @@ const properties =
 }
 const days = 4*360
 const delta = days*24*60*60
+const dataStartTimestamp= Date.now()/1000 - delta
+const dataEndTimestamp= Date.now()/1000
+
 const startTimestamp = Date.now()/1000 - delta
 const endTimestamp = Date.now()/1000
 const currentInterval = interval.oneDay
@@ -36,6 +40,10 @@ class App extends Component
         super()
 
         this.state = {
+            p:{
+                dataStartTimestamp:dataStartTimestamp,
+                dataEndTimestamp:dataEndTimestamp
+            },
             baseData:{},
             relativeData:{},
             currencies:[],
@@ -46,6 +54,8 @@ class App extends Component
             graphHeight:window.innerHeight/2
         }
 
+        window.addEventListener('hashchange', this.onHashChanged, false)
+        
         /*
         //Format example:
 
@@ -56,9 +66,64 @@ class App extends Component
         }
         */
 
-        this.getCurrencyPairs()
+        
         //let baseUrl= 'https://poloniex.com/public?command=returnChartData&currencyPair=BTC_XMR&end=9999999999&period=14400&start=1405699200'
     }
+
+    componentWillMount=()=>
+    {
+        this.parseParameters(window.location.hash)
+        this.getCurrencyPairs()
+    }
+
+    onHashChanged=()=>
+    {
+        const parsedHash = QueryString.parse(window.location.hash)
+        this.parseParameters(parsedHash)
+        console.log(parsedHash)
+    }
+
+    parseParameters=(params)=>
+    {
+        let p = this.state.p
+        let data = QueryString.stringify(params)
+
+
+        //Start
+        if(params.dataStartTimestamp)
+            p.dataStartTimestamp=params.dataStartTimestamp
+
+        if(params.startTimestamp)
+            p.startTimestamp = params.startTimestamp
+        
+        if(p.startTimestamp<p.dataStartTimestamp)
+            p.startTimestamp = p.dataStartTimestamp
+
+        //End
+        if(params.dataEndTimestamp)
+            p.dataEndTimestamp = params.dataEndTimestamp
+
+        if(params.endTimestamp)
+            p.endTimestamp = params.endTimestamp
+        
+        if(p.endTimestamp>p.dataEndTimestamp)
+            p.endTimestamp = p.dataEndTimestamp
+
+        //Reference
+        if(params.referenceTimestamp)
+            p.reference = params.reference
+
+        if(p.referenceTimestamp<p.startTimestamp)
+            p.referenceTimestamp = p.startTimestamp
+        
+        if(p.referenceTimestamp>p.endTimestamp)
+            p.referenceTimestamp = p.endTimestamp
+
+
+        this.setState({p:p})
+        console.log(this.state.p)
+    }
+
 
     downloadCurrency=(id, isReverted = false)=>
     {
@@ -72,8 +137,8 @@ class App extends Component
                 command: 'returnChartData',
                 currencyPair: currencyPair,
                 period:currentInterval,
-                end:endTimestamp,
-                start:startTimestamp
+                end:this.state.p.dataEndTimestamp,
+                start:this.state.p.dataStartTimestamp
                 }
         })
         .then((result)=> {
@@ -416,14 +481,16 @@ class App extends Component
                         maxDate = {this.secondsToDate(endTimestamp)}
                         onChange={this.onPickerStartDateChanged}
                         openToYearSelection={true}
-                        hideCalendarDate={true}/>
+                        hideCalendarDate={true}
+                        autoOk={true}/>
                     <DatePicker
                         hintText="End date"
                         minDate = {this.secondsToDate(startTimestamp)}
                         maxDate = {this.secondsToDate(endTimestamp)}
                         value = {this.secondsToDate(this.state.endDate)}
                         openToYearSelection={true}
-                        hideCalendarDate={true}/>
+                        hideCalendarDate={true}
+                        autoOk={true}/>
 
                     <DatePicker
                         hintText="Reference"
@@ -431,7 +498,8 @@ class App extends Component
                         maxDate = {this.secondsToDate(endTimestamp)}
                         value= {this.secondsToDate(this.state.referenceDate)}
                         openToYearSelection={true}
-                        hideCalendarDate={true}/>
+                        hideCalendarDate={true}
+                        autoOk={true}/>
                 </div>
 
                 <DateSlider
@@ -455,4 +523,4 @@ class App extends Component
     }
 }
 
-export default App;
+export default App
